@@ -5,18 +5,19 @@ const { Server: SocketServer } = require('socket.io');
 const exphbs = require('express-handlebars');
 const routerM = require('./Routers/router.js')
 const modulo = require('./Entregas/Entrega2.js')
-const moduloMon = require('./Entregas/ContenedorMongo.js')
 const DaoMon = require('./Daos/Productos/productosDaoMongo')
-const moduloFirebase = require('./Entregas/Databases/Firebase.js')
+const DaoFirebase = require('./Daos/Productos/productosDaoFirebase')
+//const moduloFirebase = require('./Entregas/Databases/Firebase.js')
 const mongoose = require('mongoose')
 const arc = new modulo.Contenedor('productos');
 const msg = new modulo.Contenedor('mensajes');
 
 //const mon = new moduloMon.Contenedor('productos', s, mongoose.model('productos', s));
 const daomon = new DaoMon.productosDaoMongo();
+const daofire = new DaoFirebase.productosDaoFirebase();
 
 
-const fire = new moduloFirebase.Contenedor();
+//const fire = new moduloFirebase.Contenedor();
 
 const app = express();
 const httpServer = new HTTPServer(app)
@@ -24,15 +25,12 @@ const io = new SocketServer(httpServer)
 
 //-----FIREBASE
 
-//fire.buscar() // -> trae todos los productos
-//fire.insertar({ nombre: 'Shampoo', precio: 2 }) -> Inserta un documento en coleccion productos
-//fire.buscarPorID('YeomRs5ABZMyoTvFL4WO') -> Trae producto segun ID
+//daofire.buscar() // -> trae todos los productos
+//daofire.save({ nombre: 'Shampoo', precio: 2 })
+//daofire.getById('YeomRs5ABZMyoTvFL4WO') -> Trae producto segun ID
 
-//fire.borrar(' COLOCAR ID ') -> borra segun id
-//fire.actualizar('YeomRs5ABZMyoTvFL4WO', 'ALMENDRAS') -> Actualiza segun id y nombre nuevo
-
-//borrar() -> borra por id
-
+//daofire.deleteById(' COLOCAR ID ') -> borra segun id
+//daofire.update('YeomRs5ABZMyoTvFL4WO', 'ALMENDRAS') -> Actualiza segun id y nombre nuevo
 
 //-----FIREBASE
 
@@ -60,11 +58,12 @@ conectarmongo = async conectar => {
 conectarmongo()
 
 // ---- OPERACIONES CON CONTENEDOR DE PRODUCTOS MONGOOSE ----
-//mon.save(productos);
-//mon.deleteById('61b4f54d3988dc94b6c0bfb1');
-//mon.getAll(productos);
-//mon.getById('61b4f594e74858e93c45cbf1')
-daomon.getById('61b4f594e74858e93c45cbf1')
+//daomon.save(productos);
+//daomon.deleteById('61b4f54d3988dc94b6c0bfb1');
+//daomon.getAll();
+//daomon.getById('61b4f594e74858e93c45cbf1')
+//daomon.getById('61b4f594e74858e93c45cbf1')
+
 
 
 //-------MONGOOSE
