@@ -11,6 +11,7 @@ const exphbs = require('express-handlebars');
 const routerM = require('./Routers/router.js')
 const modulo = require('./Entregas/Entrega2.js')
 const DaoMon = require('./Daos/Productos/productosDaoMongo')
+const CartsDaoMon = require('./Daos/Productos/CartsDaoMongo')
 const DaoFirebase = require('./Daos/Productos/productosDaoFirebase')
 const DaoCartsFirebase = require('./Daos/Productos/cartsDaoFirebase')
 //const moduloFirebase = require('./Entregas/Databases/Firebase.js')
@@ -20,6 +21,7 @@ const msg = new modulo.Contenedor('mensajes');
 
 //const mon = new moduloMon.Contenedor('productos', s, mongoose.model('productos', s));
 const daomon = new DaoMon.productosDaoMongo();
+const cartsdaomon = new CartsDaoMon.CartsDaoMongo();
 const daofire = new DaoFirebase.productosDaoFirebase();
 const cartsdaofire = new DaoCartsFirebase.cartsDaoFirebase();
 
@@ -63,16 +65,19 @@ const productos = [
     { nombre: 'Acondicionador', precio: 22 }
 ]
 
+const cart =
+    { productos: '[title: escuadra, price: 2]' },
 
-//----CONEXION A BD MONGO
 
-conectarmongo = async conectar => {
-    await mongoose.connect('mongodb://localhost/productos', {
-        serverSelectionTimeoutMS: 5000,
-    })
-    console.log('Base de datos conectada')
+    //----CONEXION A BD MONGO
 
-}
+    conectarmongo = async conectar => {
+        await mongoose.connect('mongodb://localhost/productos', {
+            serverSelectionTimeoutMS: 5000,
+        })
+        console.log('Base de datos conectada')
+
+    }
 conectarmongo()
 
 // ---- OPERACIONES CON CONTENEDOR DE PRODUCTOS MONGOOSE ----
@@ -80,9 +85,10 @@ conectarmongo()
 //daomon.deleteById('61b4f54d3988dc94b6c0bfb1');
 //daomon.getAll();
 //daomon.getById('61b4f594e74858e93c45cbf1')
-//daomon.getById('61b4f594e74858e93c45cbf1')
 
-
+//cartsdaomon.save(cart);
+//cartsdaomon.getAll();
+//cartsdaomon.getById('insertar id')
 
 //-------MONGOOSE
 
