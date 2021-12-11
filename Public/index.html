@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <script src="/socket.io/socket.io.js" type="text/javascript"></script>
+
+    <script>
+        const socket = io.connect();
+
+        socket.on('messages', data => {
+            console.log(data)
+            mostrarListado(data)
+
+        })
+
+        socket.on('mensajes', data => {
+            console.log(data)
+            mostrarListadoMsj(data)
+
+        })
+
+const mostrarListado = (list) => {
+    
+
+const html = list.map((element, index) => {                                                                 
+    
+    return (`
+    <div>
+        <strong> ${element.title} </strong>
+    </div>
+    ` 
+        
+    )
+}).join(' ')
+
+document.getElementById('listado').innerHTML = html;
+}
+
+const mostrarListadoMsj = (list) => {
+    
+
+    const html = list.map((element, index) => {                                                                 
+        
+        return (`
+        <div>
+            <strong> ${element.email} </strong> - <strong> ${element.mj} </strong>
+        </div>
+        ` 
+            
+        )
+    }).join(' ')
+    
+    document.getElementById('mensajes').innerHTML = html;
+    }
+    
+
+
+
+const enviarForm = () => {
+    const envio = {
+        title: document.getElementById('nombre').value,
+        price: document.getElementById('precio').value,
+        thumbnail: document.getElementById('imagen').value
+    }
+    socket.emit('new-product', envio)
+
+    document.getElementById('nombre').value = ''
+        document.getElementById('precio').value = ''
+        document.getElementById('imagen').value = ''
+
+    return false
+}
+
+
+const enviarMensaje = () => {
+    const envio = {
+        email: document.getElementById('email').value,
+        mj: document.getElementById('mj').value
+    }
+    socket.emit('new-mensaje', envio)
+
+    document.getElementById('email').value = ''
+        document.getElementById('mj').value = ''
+
+    return false
+}
+
+    </script>
+
+</head>
+
+<body>
+
+    <form onsubmit="return enviarForm(this)">
+        <p>Nombre: <input type="text" id="nombre" name="nombre" size="40"></p>
+        <p>Precio: <input type="text" name="price" id="precio" size="40"></p>
+        <p>Imagen: <input type="text" name="thumbnail" id="imagen" size="40"></p>
+        <p>
+            <input type="submit" value="Enviar">
+        </p>
+
+
+    </form>
+    <button><a href="http://localhost:8080/productos"> Ver productos </a> </button>
+
+    <h2>Productos</h2>
+    <div id="listado">
+
+        
+    </div>
+    <h2>Centro de Mensajes</h2>
+    
+    <form onsubmit="return enviarMensaje(this)">
+        <p>Email: <input type="email" id="email" name="email" size="40"></p>
+        <p>Mensaje: <input type="text" name="mj" id="mj" size="40"></p>
+        <p>
+            <input type="submit" value="Enviar">
+        </p>
+<div id="mensajes"> </div>
+    
+</body>
+
+</html>

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <script src="/socket.io/socket.io.js" type="text/javascript"></script>
+
+    <script>
+        const socket = io.connect();
+
+        socket.on('messages', data => {
+            console.log(data)
+            mostrarListado(data)
+
+        })
+
+const mostrarListado = (listado) => {
+    
+
+const html = listado.map((element, index) => {
+    
+    return (`
+    <div>
+        <strong> ${element.title} </strong>
+    </div>
+    ` 
+        
+    )
+}).join(' ')
+
+document.getElementById('listado').innerHTML = html;
+}
+
+
+
+    </script>
+
+</head>
+
+<body>
+
+    <form action="http://localhost:8080/api/productos" method="post">
+        <p>Nombre: <input type="text" name="title" size="40"></p>
+        <p>Precio: <input type="text" name="price" size="40"></p>
+        <p>Imagen: <input type="text" name="thumbnail" size="40"></p>
+        <p>
+            <input type="submit" value="Enviar">
+        </p>
+
+
+    </form>
+    <button><a href="http://localhost:8080/productos"> Ver productos </a> </button>
+
+    <h2>Productos</h2>
+    <div id="listado">
+        
+    </div>
+</body>
+
+</html>
