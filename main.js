@@ -11,13 +11,9 @@ const moduloFirebase = require('./Entregas/Databases/Firebase.js')
 const mongoose = require('mongoose')
 const arc = new modulo.Contenedor('productos');
 const msg = new modulo.Contenedor('mensajes');
-const s = new mongoose.Schema({
-    nombre: { type: String, required: true },
-    precio: { type: Number, required: true }
 
-});
-const mon = new moduloMon.Contenedor('productos', s, mongoose.model('productos', s));
-const daomon = new DaoMon.productosDaoMongo('productos', s, mongoose.model('productos', s));
+//const mon = new moduloMon.Contenedor('productos', s, mongoose.model('productos', s));
+const daomon = new DaoMon.productosDaoMongo();
 
 
 const fire = new moduloFirebase.Contenedor();
