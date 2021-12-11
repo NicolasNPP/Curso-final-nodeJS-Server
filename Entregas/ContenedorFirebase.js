@@ -4,10 +4,7 @@ const fs = require('fs');
 class Contenedor {
     constructor(coleccion) {
         this.coleccion = coleccion;
-        const serviceAccount = JSON.parse(fs.readFileSync('backend-coderhouse-efe86-firebase-adminsdk-nwjt9-3d483c1fd4.json', 'utf8'))
-        admin.initializeApp({
-            credential: admin.credential.cert(serviceAccount)
-        });
+
 
         this.db = admin.firestore();
         this.dbProductos = this.db.collection(this.coleccion);

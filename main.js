@@ -1,12 +1,18 @@
 const express = require('express')
 const { Server: HTTPServer } = require('http')
 const { Server: SocketServer } = require('socket.io');
-
+const admin = require('firebase-admin');
+const fs = require('fs');
+const serviceAccount = JSON.parse(fs.readFileSync('backend-coderhouse-efe86-firebase-adminsdk-nwjt9-3d483c1fd4.json', 'utf8'))
+admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount)
+});
 const exphbs = require('express-handlebars');
 const routerM = require('./Routers/router.js')
 const modulo = require('./Entregas/Entrega2.js')
 const DaoMon = require('./Daos/Productos/productosDaoMongo')
 const DaoFirebase = require('./Daos/Productos/productosDaoFirebase')
+const DaoCartsFirebase = require('./Daos/Productos/cartsDaoFirebase')
 //const moduloFirebase = require('./Entregas/Databases/Firebase.js')
 const mongoose = require('mongoose')
 const arc = new modulo.Contenedor('productos');
@@ -15,8 +21,16 @@ const msg = new modulo.Contenedor('mensajes');
 //const mon = new moduloMon.Contenedor('productos', s, mongoose.model('productos', s));
 const daomon = new DaoMon.productosDaoMongo();
 const daofire = new DaoFirebase.productosDaoFirebase();
+const cartsdaofire = new DaoCartsFirebase.cartsDaoFirebase();
 
 
+
+//iniciar firebase
+
+
+
+
+//
 //const fire = new moduloFirebase.Contenedor();
 
 const app = express();
@@ -24,13 +38,17 @@ const httpServer = new HTTPServer(app)
 const io = new SocketServer(httpServer)
 
 //-----FIREBASE
-
-//daofire.buscar() // -> trae todos los productos
+//daofire.getAll() // -> trae todos los productos
 //daofire.save({ nombre: 'Shampoo', precio: 2 })
 //daofire.getById('YeomRs5ABZMyoTvFL4WO') -> Trae producto segun ID
 
 //daofire.deleteById(' COLOCAR ID ') -> borra segun id
 //daofire.update('YeomRs5ABZMyoTvFL4WO', 'ALMENDRAS') -> Actualiza segun id y nombre nuevo
+
+//cartsdaofire.getAll() // -> trae todos los productos
+//cartsdaofire.getById('GcIxd4KZYFMRpSpCUfM2')
+
+
 
 //-----FIREBASE
 
