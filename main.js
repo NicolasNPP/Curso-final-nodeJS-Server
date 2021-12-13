@@ -164,9 +164,11 @@ app.get('/productos', async (req, res) => {
 
 })
 
-app.get('/carrito/:id', async (req, res) => {
+app.get('/carrito', async (req, res) => {
 
-    arcCart.getAll(req.params.id).then(results => res.json(`${JSON.stringify(results)}`));
+    //arcCart.getAll(req.params.id).then(results => res.json(`${JSON.stringify(results)}`));
+
+    cartsdaomon.getAll().then(productos => res.json(productos))
 
 
 })

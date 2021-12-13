@@ -14,16 +14,10 @@ class Contenedor {
     }
 
     getAll = async inser => {
-        this.DAO.find({}, function (error, productos) {
-            if (error) {
-                console.log('Ha surgido un error.');
-            } else {
-                console.log({
-                    productos: productos
-                });
-            }
-        })
+        const productos = this.DAO.find({})
+        return productos
     }
+
 
     getById = async ID => {
         this.DAO.find({ _id: ID }, function (error, productos) {
