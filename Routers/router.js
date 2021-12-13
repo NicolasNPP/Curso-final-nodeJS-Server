@@ -2,6 +2,8 @@ const { Router, application } = require('express');
 const { Socket } = require('socket.io');
 const modulo = require('../Entregas/Entrega2.js')
 const arc = new modulo.Contenedor('productos');
+const moduloCart = require('../Entregas/Cart.js')
+const cart = new moduloCart.ContenedorCart('carrito');
 
 
 const routerM = Router();
@@ -24,10 +26,14 @@ routerM.post('/productos', (req, res) => {
 
 
     arc.save(req.body).then(results => res.send(`${results}`));
-    
+
 
     //arc.save(req.body).then(results => res.send(`${results}`));
 })
+
+routerM.get('/carrito/:id/productos', (req, res) => {
+    cart.getAll(parseInt(req.params.id)).then(results => res.json(`${JSON.stringify(results)}`));
+});
 
 routerM.get('/productoRandom', (req, res) => {
     arc.getById(parseInt(getAleatorio())).then(results => res.json(results));

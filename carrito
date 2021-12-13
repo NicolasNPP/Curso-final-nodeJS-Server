@@ -1,0 +1,86 @@
+[
+    {
+        "id": 33,
+        "timestamp": "2021-11-14T04:00:21.613Z",
+        "productos": [
+            {
+                "title": "Escuadra",
+                "price": 123.45,
+                "thumbnail": "https://cdn3.iconfinder.com/data/icons/education-209/64/ruler-triangle-stationary-school-256.png",
+                "id": 1,
+                "tiemstamp": "aa",
+                "description": "aa",
+                "code": 123,
+                "stock": 2
+            },
+            {
+                "title": "Calculadora",
+                "price": 234.56,
+                "thumbnail": "https://cdn3.iconfinder.com/data/icons/education-209/64/calculator-math-tool-school-256.png",
+                "id": 2,
+                "tiemstamp": "aa",
+                "description": "aa",
+                "code": 123,
+                "stock": 2
+            }
+        ]
+    },
+    {
+        "id": 34,
+        "timestamp": "2021-11-14T04:00:21.613Z",
+        "productos": [
+            {
+                "title": "Escuadra",
+                "price": 123.45,
+                "thumbnail": "https://cdn3.iconfinder.com/data/icons/education-209/64/ruler-triangle-stationary-school-256.png",
+                "id": 1,
+                "tiemstamp": "aa",
+                "description": "aa",
+                "code": 123,
+                "stock": 2
+            },
+            {
+                "title": "Calculadora",
+                "price": 234.56,
+                "thumbnail": "https://cdn3.iconfinder.com/data/icons/education-209/64/calculator-math-tool-school-256.png",
+                "id": 2,
+                "tiemstamp": "aa",
+                "description": "aa",
+                "code": 123,
+                "stock": 2
+            }
+        ]
+    },
+    {
+        "productos": [
+            {
+                "title": "Escuadraeasd",
+                "price": 123.45,
+                "thumbnail": "https://cdn3.iconfinder.com/data/icons/education-209/64/ruler-triangle-stationary-school-256.png",
+                "id": 1,
+                "tiemstamp": "aa",
+                "description": "aa",
+                "code": 123,
+                "stock": 2
+            },
+            {
+                "title": "aa",
+                "price": 234.56,
+                "thumbnail": "https://cdn3.iconfinder.com/data/icons/education-209/64/calculator-math-tool-school-256.png",
+                "id": 2,
+                "tiemstamp": "aa",
+                "description": "aa",
+                "code": 123,
+                "stock": 2
+            },
+            {
+                "title": "Escuadra",
+                "price": 123.45,
+                "thumbnail": "https://cdn3.iconfinder.com/data/icons/education-209/64/ruler-triangle-stationary-school-256.png",
+                "id": 1
+            }
+        ],
+        "id": 35,
+        "timestamp": "2021-11-14T04:00:21.613Z"
+    }
+]
