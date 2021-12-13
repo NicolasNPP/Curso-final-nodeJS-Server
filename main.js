@@ -10,6 +10,7 @@ admin.initializeApp({
 const exphbs = require('express-handlebars');
 const routerM = require('./Routers/router.js')
 const modulo = require('./Entregas/Entrega2.js')
+const moduloCart = require('./Entregas/cart.js')
 const DaoMon = require('./Daos/Productos/productosDaoMongo')
 const CartsDaoMon = require('./Daos/Carrito/CartsDaoMongo')
 const DaoFirebase = require('./Daos/Productos/productosDaoFirebase')
@@ -17,6 +18,7 @@ const DaoCartsFirebase = require('./Daos/Carrito/cartsDaoFirebase')
 //const moduloFirebase = require('./Entregas/Databases/Firebase.js')
 const mongoose = require('mongoose')
 const arc = new modulo.Contenedor('productos');
+const arcCart = new moduloCart.ContenedorCart('carrito');
 const msg = new modulo.Contenedor('mensajes');
 
 //const mon = new moduloMon.Contenedor('productos', s, mongoose.model('productos', s));
@@ -161,6 +163,14 @@ app.get('/productos', async (req, res) => {
 
 
 })
+
+app.get('/carrito/:id', async (req, res) => {
+
+    arcCart.getAll(req.params.id).then(results => res.json(`${JSON.stringify(results)}`));
+
+
+})
+
 
 
 
