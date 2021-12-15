@@ -35,6 +35,39 @@ routerM.get('/carrito/:id/productos', (req, res) => {
     cart.getAll(parseInt(req.params.id)).then(results => res.json(`${JSON.stringify(results)}`));
 });
 
+routerM.post('/carrito', async (req, res) => {
+
+
+    await cart.save(req.body).then(results => res.send(`${results}`));
+
+})
+
+
+
+routerM.delete('/carrito/:id', (req, res) => {
+    //En String
+
+
+    cart.deleteById(parseInt(req.params.id)).then(results => res.json(`${results}`))
+
+
+
+
+
+});
+
+routerM.put('/carrito/:id', (req, res) => {
+    //En String
+
+
+    cart.putById(req.body, parseInt(req.params.id)).then(results => res.json(results));
+
+
+
+
+
+});
+
 routerM.get('/productoRandom', (req, res) => {
     arc.getById(parseInt(getAleatorio())).then(results => res.json(results));
 });
