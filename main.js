@@ -29,6 +29,7 @@ const cartsdaofire = new DaoCartsFirebase.cartsDaoFirebase();
 
 
 
+
 //iniciar firebase
 
 
@@ -152,6 +153,21 @@ app.use('/api', routerM)
 app.get('/productos', async (req, res) => {
 
     const contenido = await arc.getAll();
+    res.render('datos.hbs', {
+        a: contenido
+
+
+
+
+    }
+    );
+
+
+})
+
+app.get('/productos-test', async (req, res) => {
+
+    const contenido = await arc.getProductFalse();
     res.render('datos.hbs', {
         a: contenido
 

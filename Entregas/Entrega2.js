@@ -1,4 +1,5 @@
 const fs = require('fs');
+const faker = require('faker');
 
 class Contenedor {
     constructor(nombreArchivo) {
@@ -88,6 +89,64 @@ class Contenedor {
         fs.promises.writeFile(this.ruta, JSON.stringify(arregloPersonas, null, 2))
 
         return `Producto actualizado`
+
+    }
+
+
+    getProductFalse = async () => {
+
+
+
+
+        try {
+            let contenido = [];
+            let producto1 = {
+                "title": faker.commerce.productName(),
+                "price": faker.random.number({ min: 199, max: 239 }),
+                "thumbnail": faker.image.nature(),
+                "id": faker.random.number({ min: 1, max: 99 }),
+            }
+
+            let producto2 = {
+                "title": faker.commerce.productName(),
+                "price": faker.random.number({ min: 199, max: 239 }),
+                "thumbnail": faker.image.nature(),
+                "id": faker.random.number({ min: 1, max: 99 }),
+            }
+
+            let producto3 = {
+                "title": faker.commerce.productName(),
+                "price": faker.random.number({ min: 199, max: 239 }),
+                "thumbnail": faker.image.nature(),
+                "id": faker.random.number({ min: 1, max: 99 }),
+            }
+
+            let producto4 = {
+                "title": faker.commerce.productName(),
+                "price": faker.random.number({ min: 199, max: 239 }),
+                "thumbnail": faker.image.nature(),
+                "id": faker.random.number({ min: 1, max: 99 }),
+            }
+
+            let producto5 = {
+                "title": faker.commerce.productName(),
+                "price": faker.random.number({ min: 199, max: 239 }),
+                "thumbnail": faker.image.nature(),
+                "id": faker.random.number({ min: 1, max: 99 }),
+            }
+            contenido.push(producto1);
+            contenido.push(producto2);
+            contenido.push(producto3);
+            contenido.push(producto4);
+            contenido.push(producto5);
+
+            return contenido
+        } catch (error) {
+            console.log(error);
+        }
+
+
+
 
     }
 

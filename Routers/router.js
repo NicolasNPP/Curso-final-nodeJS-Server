@@ -6,6 +6,9 @@ const moduloCart = require('../Entregas/Cart.js')
 const cart = new moduloCart.ContenedorCart('carrito');
 
 
+
+
+
 const routerM = Router();
 
 
@@ -19,6 +22,10 @@ routerM.get('/', (req, res) => {
 
 routerM.get('/productos', (req, res) => {
     arc.getAll().then(results => res.json(`${JSON.stringify(results)}`));
+});
+
+routerM.get('/productos-test', (req, res) => {
+    arc.getProductFalse();
 });
 
 routerM.post('/productos', (req, res) => {
