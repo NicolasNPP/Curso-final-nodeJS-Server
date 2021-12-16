@@ -26,7 +26,25 @@ const daomon = new DaoMon.productosDaoMongo();
 const cartsdaomon = new CartsDaoMon.CartsDaoMongo();
 const daofire = new DaoFirebase.productosDaoFirebase();
 const cartsdaofire = new DaoCartsFirebase.cartsDaoFirebase();
+/////////NORMALIZR
+const normalizr = require('normalizr')
+const normalize = normalizr.normalize;
+const schema = normalizr.schema;
+const desnormalize = normalize.desnormalize;
 
+const authorSchema = new schema.Entity('author')
+
+const mensajeSchema = new schema.Entity('text', {
+    author: authorSchema,
+});
+
+//const normalizeMensaje = normalize(mensaje, mensajeSchema)
+//const desnormalizeMensaje = desnormalize(normalizeMensaje.result, mensajeSchema, normalizeMensaje.entities)
+
+
+
+
+/////////////////////
 
 
 
@@ -103,7 +121,17 @@ io.on('connection', async socket => {
     socket.emit('messages', productos)
 
     const mensajes = await msg.getAll()
-    socket.emit('mensajes', mensajes)
+
+
+    let mensajesNuevo = await mensajes.map(mj => {
+
+        let a = normalize(mj, mensajeSchema)
+        return a
+
+    })
+    await console.log(mensajesNuevo)
+
+    socket.emit('mensajes', mensajesNuevo)
 
 
 
@@ -115,11 +143,35 @@ io.on('connection', async socket => {
     }
     )
 
-    socket.on('new-mensaje', mensaje => {
+    socket.on('new-mensaje', async mensaje => {
         console.log(mensaje)
-        msg.save(mensaje).then(results => console.log(`${results}`));
-        mensajes.push(mensaje)
-        io.sockets.emit('mensajes', mensajes)
+
+        const Mjnew = {
+            author: {
+                id: mensaje.id,
+                name: mensaje.name,
+                apellido: mensaje.apellido,
+                edad: mensaje.edad,
+                alias: mensaje.alias,
+                avatar: mensaje.alias,
+            },
+            text: "nn"
+        }
+
+
+        await msg.saveNew(Mjnew).then(results => console.log(`${results}`));
+        await mensajes.push(Mjnew)
+
+        let mensajesNuevo = await mensajes.map(mj => {
+
+            let a = normalize(mj, mensajeSchema)
+            return a
+
+        })
+        await console.log(mensajesNuevo)
+
+
+        await io.sockets.emit('mensajes', mensajesNuevo)
 
     }
     )

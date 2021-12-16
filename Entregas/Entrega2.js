@@ -24,6 +24,26 @@ class Contenedor {
 
     }
 
+    saveNew = async persona => {
+        const arregloPersonas = await this.getAll();
+        let ids = arregloPersonas.map(function (prod) { return prod.id });
+        let max = Math.max.apply(null, ids);
+        persona.id = max + 1
+
+
+
+
+        arregloPersonas.push(persona);
+
+        try {
+            await fs.promises.writeFile(this.ruta, JSON.stringify(arregloPersonas, null, 2))
+            return `Guardado con ID ${persona.id}`
+        } catch (error) {
+            throw new Error('No se pudo guardar')
+        }
+
+    }
+
 
     getById = async id => {
         const arregloPersonas = await this.getAll();
