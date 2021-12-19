@@ -37,6 +37,9 @@ const authorSchema = new schema.Entity('author')
 const mensajeSchema = new schema.Entity('text', {
     author: authorSchema,
 });
+//SESSION
+const session = require('express-session')
+
 
 //const normalizeMensaje = normalize(mensaje, mensajeSchema)
 //const desnormalizeMensaje = desnormalize(normalizeMensaje.result, mensajeSchema, normalizeMensaje.entities)
@@ -45,6 +48,21 @@ const mensajeSchema = new schema.Entity('text', {
 
 
 /////////////////////
+
+
+
+///MIDDELWARE
+
+function auth(req, res, next) {
+
+    if (req.session?.user === 'pepe' && req.session?.admin) {
+        return next()
+    }
+    return res.status(401).send('Error de autorizacion')
+
+}
+
+//
 
 
 
@@ -185,6 +203,12 @@ io.on('connection', async socket => {
 app.use(express.json());
 app.use(express.static('public'));
 app.use(express.urlencoded({ extended: true }));
+app.use(session({
+    secret: 'servicio',
+    resave: true,
+    saveUninitialized: false
+}
+))
 
 app.engine('hbs', exphbs({
     extname: 'hbs',
@@ -217,6 +241,8 @@ app.get('/productos', async (req, res) => {
 
 })
 
+
+
 app.get('/productos-test', async (req, res) => {
 
     const contenido = await arc.getProductFalse();
@@ -229,6 +255,48 @@ app.get('/productos-test', async (req, res) => {
     }
     );
 
+
+})
+
+app.get('/con-session', async (req, res) => {
+
+    if (req.session.contador) {
+        req.session.contador++;
+        res.send(`Usted visito esta web ${req.session.contador} veces`);
+        console.log(req.session)
+    } else {
+        req.session.contador = 1;
+        res.send('Bienvenido')
+    }
+
+
+})
+
+app.get('/private', auth, async (req, res) => {
+
+    res.send('si ves esto es porque te logeaste')
+
+})
+
+app.get('/logout', (req, res) => {
+    req.session.destroy(err => {
+        if (!err) {
+            res.send('Logout ok')
+        }
+        else res.send({ status: 'logout Error', body: err })
+    })
+})
+
+app.get('/login', (req, res) => {
+
+    const { username, password } = req.query;
+
+    if (username !== 'pepe' || password !== 'pepepass') {
+        return res.send('Login failed')
+    } else
+        req.session.user = username;
+    req.session.admin = true;
+    res.send('login success')
 
 })
 
