@@ -13,6 +13,7 @@ const modulo = require('./Entregas/Entrega2.js')
 const moduloCart = require('./Entregas/cart.js')
 const DaoMon = require('./Daos/Productos/productosDaoMongo')
 const CartsDaoMon = require('./Daos/Carrito/CartsDaoMongo')
+const UserDaoMon = require('./Daos/Usuarios/usuariosDaoMongo')
 const DaoFirebase = require('./Daos/Productos/productosDaoFirebase')
 const DaoCartsFirebase = require('./Daos/Carrito/cartsDaoFirebase')
 //const moduloFirebase = require('./Entregas/Databases/Firebase.js')
@@ -24,6 +25,7 @@ const msg = new modulo.Contenedor('mensajes');
 //const mon = new moduloMon.Contenedor('productos', s, mongoose.model('productos', s));
 const daomon = new DaoMon.productosDaoMongo();
 const cartsdaomon = new CartsDaoMon.CartsDaoMongo();
+const userdaomon = new UserDaoMon.usuariosDaoMongo();
 const daofire = new DaoFirebase.productosDaoFirebase();
 const cartsdaofire = new DaoCartsFirebase.cartsDaoFirebase();
 /////////NORMALIZR
@@ -31,6 +33,7 @@ const normalizr = require('normalizr')
 const normalize = normalizr.normalize;
 const schema = normalizr.schema;
 const desnormalize = normalize.desnormalize;
+const MongoStore = require('connect-mongo')
 
 const authorSchema = new schema.Entity('author')
 
@@ -55,12 +58,37 @@ const session = require('express-session')
 
 function auth(req, res, next) {
 
-    if (req.session?.user === 'pepe' && req.session?.admin) {
-        return next()
-    }
-    return res.status(401).send('Error de autorizacion')
+    const y = userdaomon.validateName(req.session.user);
+
+
+    const user = req.session.user;
+    const pass = req.session.pass;
+
+    y.then(a => {
+
+        if ((a.length == 0)) {
+            return res.status(401).send('Error de autorizacion')
+        } else {
+            if ((a[0].usuario == user) && (a[0].pass == pass)) {
+                return next()
+            } else {
+
+                return res.status(401).send('Error de autorizacion')
+            }
+        }
+
+
+    })
+
+
+
+
+
+
 
 }
+
+
 
 //
 
@@ -203,12 +231,13 @@ io.on('connection', async socket => {
 app.use(express.json());
 app.use(express.static('public'));
 app.use(express.urlencoded({ extended: true }));
+
 app.use(session({
+    store: MongoStore.create({ mongoUrl: 'mongodb://localhost/sesiones' }),
     secret: 'servicio',
     resave: true,
     saveUninitialized: false
-}
-))
+}))
 
 app.engine('hbs', exphbs({
     extname: 'hbs',
@@ -230,13 +259,23 @@ app.get('/productos', async (req, res) => {
 
     const contenido = await arc.getAll();
     res.render('datos.hbs', {
-        a: contenido
+        a: contenido,
+        b: `Hola! ${req.session.user}`
 
 
 
 
     }
     );
+
+
+})
+
+app.get('/nombre', async (req, res) => {
+
+    const nombre = req.session.user;
+    res.json(nombre)
+
 
 
 })
@@ -279,9 +318,11 @@ app.get('/private', auth, async (req, res) => {
 })
 
 app.get('/logout', (req, res) => {
+    const nombreLogout = req.session.user;
+
     req.session.destroy(err => {
         if (!err) {
-            res.send('Logout ok')
+            res.send(`Hasta luego ${nombreLogout}`)
         }
         else res.send({ status: 'logout Error', body: err })
     })
@@ -291,14 +332,53 @@ app.get('/login', (req, res) => {
 
     const { username, password } = req.query;
 
-    if (username !== 'pepe' || password !== 'pepepass') {
-        return res.send('Login failed')
-    } else
-        req.session.user = username;
-    req.session.admin = true;
-    res.send('login success')
+    const y = userdaomon.validateName(username);
+
+    y.then(a => {
+
+        if ((a.length == 0)) {
+            return res.send('Login failed')
+        } else {
+
+            if ((a[0].usuario == username) && (a[0].pass == password)) {
+                req.session.user = username;
+                req.session.pass = password;
+                req.session.admin = true;
+                res.send('login success')
+            } else {
+                return res.send('Login failed')
+            }
+
+        }
+
+
+
+
+    })
+
+
 
 })
+
+app.get('/pruebas', (req, res) => {
+    const y = userdaomon.validateName('nicolas');
+
+    const user = 'nicolas';
+    const pass = 'pepe';
+
+    y.then(a => {
+        if ((a[0].usuario == user) && (a[0].pass == pass)) {
+            console.log('logeado')
+        } else { console.log('no logeado') }
+    })
+
+
+
+
+
+})
+
+
 
 app.get('/carrito', async (req, res) => {
 

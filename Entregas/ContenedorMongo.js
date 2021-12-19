@@ -31,6 +31,11 @@ class Contenedor {
         })
     }
 
+    validateName = async name => {
+        const productos = this.DAO.find({ usuario: name })
+        return productos
+    }
+
     deleteById = async ID => {
         this.DAO.remove({ _id: ID }, function (error) {
             if (error) {
