@@ -22,7 +22,7 @@ class Contenedor {
     getById = async ID => {
         this.DAO.find({ _id: ID }, function (error, productos) {
             if (error) {
-                console.log('Ha surgido un error.');
+                //console.log('Ha surgido un error.');
             } else {
                 console.log({
                     productos: productos
@@ -32,7 +32,7 @@ class Contenedor {
     }
 
     validateName = async name => {
-        const productos = this.DAO.find({ usuario: name })
+        const productos = this.DAO.find({ username: name })
         return productos
     }
 

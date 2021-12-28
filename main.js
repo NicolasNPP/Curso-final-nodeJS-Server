@@ -40,6 +40,11 @@ const authorSchema = new schema.Entity('author')
 const mensajeSchema = new schema.Entity('text', {
     author: authorSchema,
 });
+
+const passport = require('passport')
+const LocalStrategy = require('passport-local').Strategy
+const bCrypt = require('bcrypt');
+
 //SESSION
 const session = require('express-session')
 
@@ -70,6 +75,7 @@ function auth(req, res, next) {
             return res.status(401).send('Error de autorizacion')
         } else {
             if ((a[0].usuario == user) && (a[0].pass == pass)) {
+                req.session.contador++;
                 return next()
             } else {
 
@@ -252,7 +258,87 @@ app.set('views', './views')
 app.use('/api', routerM)
 
 
+//PASSPORT
+app.use(passport.initialize());
+app.use(passport.session());
 
+passport.use(
+    'signup',
+    new LocalStrategy(
+        {
+            passReqToCallback: true,
+        },
+        (req, username, password, done) => {
+            //const { direccion } = req.body
+
+
+            const user = {
+                id: `${Date.now()}`,
+                username,
+                password,
+            }
+            //usuarios.push(user)
+            userdaomon.save(user)
+            req.session.username = username;
+            return done(null, user)
+        }
+    )
+)
+passport.use(
+    'login',
+    new LocalStrategy(
+        {
+            passReqToCallback: true,
+        }, (req, username, password, done) => {
+            //const user = usuarios.find(usuario => usuario.username == username)
+
+
+            userdaomon.validateName(username).then(a => {
+
+
+                if ((a[0].username == username) && (a[0].password == password)) {
+
+
+                    user = a[0];
+                    //console.log(user)
+                    req.session.username = username;
+                    return done(null, user)
+                } else {
+                    //console.log(a)
+                    return done(null, false)
+                }
+
+
+
+
+
+
+            })
+
+
+
+
+
+
+
+
+
+
+
+
+
+        })
+)
+
+passport.serializeUser(function (user, done) {
+    done(null, user.id)
+})
+
+passport.deserializeUser(function (id, done) {
+    const usuario = userdaomon.getById(id)
+
+    done(null, usuario)
+})
 //RUTA PARA ENTREGA HANDLE:
 
 app.get('/productos', async (req, res) => {
@@ -261,6 +347,29 @@ app.get('/productos', async (req, res) => {
     res.render('datos.hbs', {
         a: contenido,
         b: `Hola! ${req.session.user}`
+
+
+
+
+    }
+    );
+
+
+})
+
+app.get('/failsignup', async (req, res) => {
+
+    console.log('error al logear')
+
+
+
+})
+
+app.get('/datos', auth, async (req, res) => {
+
+    res.render('misdatos.hbs', {
+        nombre: req.session.username,
+        contador: req.session.contador
 
 
 
@@ -302,7 +411,7 @@ app.get('/con-session', async (req, res) => {
     if (req.session.contador) {
         req.session.contador++;
         res.send(`Usted visito esta web ${req.session.contador} veces`);
-        console.log(req.session)
+        //console.log(req.session)
     } else {
         req.session.contador = 1;
         res.send('Bienvenido')
@@ -318,7 +427,7 @@ app.get('/private', auth, async (req, res) => {
 })
 
 app.get('/logout', (req, res) => {
-    const nombreLogout = req.session.user;
+    const nombreLogout = req.session.username;
 
     req.session.destroy(err => {
         if (!err) {
@@ -337,16 +446,16 @@ app.get('/login', (req, res) => {
     y.then(a => {
 
         if ((a.length == 0)) {
-            return res.send('Login failed')
+            return res.redirect('/error.html')
         } else {
 
             if ((a[0].usuario == username) && (a[0].pass == password)) {
                 req.session.user = username;
                 req.session.pass = password;
                 req.session.admin = true;
-                res.send('login success')
+                res.redirect('/datos')
             } else {
-                return res.send('Login failed')
+                return res.redirect('/error.html')
             }
 
         }
@@ -359,6 +468,22 @@ app.get('/login', (req, res) => {
 
 
 })
+
+app.post(
+    '/login',
+    passport.authenticate('login', {
+        failureRedirect: '/faillogin',
+        successRedirect: '/datos',
+    })
+)
+
+app.post(
+    '/login2',
+    passport.authenticate('login', {
+        failureRedirect: '/faillogin',
+        successRedirect: '/datos',
+    })
+)
 
 app.get('/pruebas', (req, res) => {
     const y = userdaomon.validateName('nicolas');
@@ -388,6 +513,32 @@ app.get('/carrito', async (req, res) => {
 
 
 })
+
+app.post('/register', async (req, res) => {
+
+    const y = userdaomon.validateName(req.body.usuario);
+
+    y.then(a => {
+        if ((a.length == 0)) {
+            console.log('Registrando')
+            userdaomon.save(req.body)
+            res.redirect('/login.html')
+        } else {
+            console.log('El usuario ya existe')
+
+        }
+    })
+
+
+})
+
+app.post(
+    '/signup',
+    passport.authenticate('signup', {
+        failureRedirect: '/failsignup',
+        successRedirect: '/',
+    })
+)
 
 
 

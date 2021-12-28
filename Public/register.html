@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+
+
+
+    <script>
+
+
+
+
+
+        const enviarForm = () => {
+            const envio = {
+                title: document.getElementById('nombre').value,
+
+            }
+            //socket.emit('new-product', envio)
+
+            document.getElementById('nombre').value = ''
+
+
+            return false
+        }
+
+
+
+
+    </script>
+
+</head>
+
+<body>
+    <h1>Registro</h1>
+
+    <form action="http://localhost:8080/signup" method="post">
+        <p>Usuario: <input type="text" name="username" size="40"></p>
+
+        <p>Contraseña: <input type="password" name="password" size="40"></p>
+        <p>
+            <input type="submit" value="Enviar">
+        </p>
+
+
+    </form>
+
+    <div>
+        <a href="http://localhost:8080/login.html"> Ir a login </a>
+    </div>
+
+
+
+</body>
+
+</html>
