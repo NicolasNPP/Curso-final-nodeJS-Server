@@ -99,6 +99,8 @@ function auth(req, res, next) {
 //
 
 
+//BCRYPT
+
 
 //iniciar firebase
 
@@ -241,6 +243,11 @@ app.use(express.urlencoded({ extended: true }));
 app.use(session({
     store: MongoStore.create({ mongoUrl: 'mongodb://localhost/sesiones' }),
     secret: 'servicio',
+    cookie: {
+        httpOnly: false,
+        secure: false,
+        maxAge: 600
+    },
     resave: true,
     saveUninitialized: false
 }))
@@ -268,8 +275,10 @@ passport.use(
         {
             passReqToCallback: true,
         },
-        (req, username, password, done) => {
+        async (req, username, password, done) => {
             //const { direccion } = req.body
+            let passwordHash = await bCrypt.hash(password, 8);
+
 
             userdaomon.validateName(username).then(a => {
 
@@ -277,7 +286,7 @@ passport.use(
                     const user = {
                         id: `${Date.now()}`,
                         username,
-                        password,
+                        password: passwordHash,
                     }
                     //usuarios.push(user)
                     userdaomon.save(user)
@@ -304,14 +313,23 @@ passport.use(
     new LocalStrategy(
         {
             passReqToCallback: true,
-        }, (req, username, password, done) => {
+        }, async (req, username, password, done) => {
             //const user = usuarios.find(usuario => usuario.username == username)
 
 
+
+            //
+
             userdaomon.validateName(username).then(a => {
 
+                //HASH
+                let hashSaved = a[0].password;
+                let compare = bCrypt.compareSync(password, hashSaved);
 
-                if ((a[0].username == username) && (a[0].password == password)) {
+
+
+
+                if ((a[0].username == username) && (compare == true)) {
 
 
                     user = a[0];
