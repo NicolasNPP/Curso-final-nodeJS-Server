@@ -271,16 +271,31 @@ passport.use(
         (req, username, password, done) => {
             //const { direccion } = req.body
 
+            userdaomon.validateName(username).then(a => {
 
-            const user = {
-                id: `${Date.now()}`,
-                username,
-                password,
-            }
-            //usuarios.push(user)
-            userdaomon.save(user)
-            req.session.username = username;
-            return done(null, user)
+                if (a.length === 0) {
+                    const user = {
+                        id: `${Date.now()}`,
+                        username,
+                        password,
+                    }
+                    //usuarios.push(user)
+                    userdaomon.save(user)
+                    req.session.username = username;
+                    return done(null, user)
+
+
+
+                } else {
+                    console.log('El usuario ya existe')
+                    return done(null, false)
+
+
+                }
+
+            })
+
+
         }
     )
 )
@@ -536,7 +551,7 @@ app.post(
     '/signup',
     passport.authenticate('signup', {
         failureRedirect: '/failsignup',
-        successRedirect: '/',
+        successRedirect: '/datos',
     })
 )
 
