@@ -43,8 +43,10 @@ routerM.get('/carrito/:id/productos', (req, res) => {
     cart.getAll(parseInt(req.params.id)).then(results => res.json(`${JSON.stringify(results)}`));
 });
 
-routerM.get('/randoms/:cantidad', async (req, res) => {
 
+
+
+routerM.get('/randoms', async (req, res) => {
 
     const computo = fork('./computo.js')
     computo.send('start')
@@ -55,23 +57,6 @@ routerM.get('/randoms/:cantidad', async (req, res) => {
 
 
 
-
-
-});
-
-
-
-routerM.get('/randoms', async (req, res) => {
-
-    const arreglo = [];
-    for (let a = 0; a < 1000000; a++) {
-        const random = Math.random() * (1000 - 1) + 1;
-        arreglo.push(random)
-    }
-    const objeto = {
-        "Numeros": arreglo
-    }
-    res.json(objeto)
 
 
 });

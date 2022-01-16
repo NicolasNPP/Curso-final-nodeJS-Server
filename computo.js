@@ -5,7 +5,7 @@ const computo = () => {
     let sum = 0;
     console.info('inicio de cálculo');
     console.time('El cálculo requiere mucho tiempo');
-    for (let i = 0; i < 300; i++) {
+    for (let i = 0; i < 1000000000; i++) {
         sum += i
     };
     console.info('Fin del cálculo');
