@@ -48,6 +48,37 @@ const bCrypt = require('bcrypt');
 //SESSION
 const session = require('express-session')
 
+//dotenv
+const path = require('path')
+const dotenv = require('dotenv')
+
+dotenv.config({
+    path:
+        process.env.MODO = 'claves'
+            ? path.resolve(__dirname, 'claves.env')
+            : path.resolve(__dirname, 'colores.env')
+})
+
+//MINIMIST
+
+const parseArgs = require('minimist')
+
+const options = {
+    alias: {
+        m: 'modo',
+        p: 'puerto',
+        d: 'debug'
+    },
+    default: {
+        modo: 'prod',
+        puerto: 8080,
+        debug: false
+    }
+}
+
+const commandLineArgs = process.argv.slice(2);
+const { modo, puerto, debug, _ } = parseArgs(commandLineArgs, options)
+console.log({ modo, puerto, debug, otros: _ })
 
 //const normalizeMensaje = normalize(mensaje, mensajeSchema)
 //const desnormalizeMensaje = desnormalize(normalizeMensaje.result, mensajeSchema, normalizeMensaje.entities)
@@ -277,7 +308,7 @@ passport.use(
         },
         async (req, username, password, done) => {
             //const { direccion } = req.body
-            let passwordHash = await bCrypt.hash(password, 8);
+            let passwordHash = await bCrypt.hash(process.env.PASSWORD, 8);
 
 
             userdaomon.validateName(username).then(a => {
@@ -386,6 +417,33 @@ app.get('/productos', async (req, res) => {
 
     }
     );
+
+
+})
+
+app.get('/info', async (req, res) => {
+
+    let argumentos = process.argv;
+    let path = process.execPath;
+    let processid = process.pid;
+    let so = process.platform;
+    let nodev = process.version;
+    let memoriatotalre = process.memoryUsage;
+
+    let carpetaproyecto = process.cwd;
+
+    const respuesta = {
+        "Argumentos": { argumentos },
+        "path": { path },
+        "ProcessID": { processid },
+        "SistemaOperativo": { so },
+        "NodeVersion": { nodev },
+        "MemoriaDisponible": { memoriatotalre }
+
+    }
+
+
+    res.json(respuesta)
 
 
 })
@@ -577,7 +635,7 @@ app.post(
 
 
 
-const server = httpServer.listen(8080, () => {
+const server = httpServer.listen(puerto, () => {
     console.log(`Ya me conecte al puerto ${server.address().port}`)
 })
 

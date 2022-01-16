@@ -4,6 +4,7 @@ const modulo = require('../Entregas/Entrega2.js')
 const arc = new modulo.Contenedor('productos');
 const moduloCart = require('../Entregas/Cart.js')
 const cart = new moduloCart.ContenedorCart('carrito');
+const { fork } = require('child_process')
 
 
 
@@ -41,6 +42,47 @@ routerM.post('/productos', (req, res) => {
 routerM.get('/carrito/:id/productos', (req, res) => {
     cart.getAll(parseInt(req.params.id)).then(results => res.json(`${JSON.stringify(results)}`));
 });
+
+routerM.get('/randoms/:cantidad', async (req, res) => {
+
+
+    const computo = fork('./computo.js')
+    computo.send('start')
+    computo.on('message', sum => {
+        res.send(`la suma es ${sum}`)
+    })
+
+
+
+
+
+
+});
+
+
+
+routerM.get('/randoms', async (req, res) => {
+
+    const arreglo = [];
+    for (let a = 0; a < 1000000; a++) {
+        const random = Math.random() * (1000 - 1) + 1;
+        arreglo.push(random)
+    }
+    const objeto = {
+        "Numeros": arreglo
+    }
+    res.json(objeto)
+
+
+});
+
+
+
+
+
+
+
+
 
 routerM.post('/carrito', async (req, res) => {
 
