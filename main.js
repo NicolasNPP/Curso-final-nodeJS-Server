@@ -2,7 +2,7 @@ const express = require('express')
 const http = require('http')
 const { Server: HTTPServer } = require('http')
 
-const { Server: SocketServer } = require('socket.io');
+
 const admin = require('firebase-admin');
 const fs = require('fs');
 const serviceAccount = JSON.parse(fs.readFileSync('backend-coderhouse-efe86-firebase-adminsdk-nwjt9-3d483c1fd4.json', 'utf8'))
@@ -99,6 +99,7 @@ console.log({ modo, puerto, debug, otros: _ })
 
 
 
+
 ///MIDDELWARE
 
 function auth(req, res, next) {
@@ -151,6 +152,7 @@ function auth(req, res, next) {
 //const fire = new moduloFirebase.Contenedor();
 
 const app = express();
+const httpServer = new HTTPServer(app)
 
 
 //-----FIREBASE
@@ -371,6 +373,7 @@ app.get('/info', async (req, res) => {
     let so = process.platform;
     let nodev = process.version;
     let memoriatotalre = process.memoryUsage;
+    let procesadores = numCPUs;
 
     let carpetaproyecto = process.cwd;
 
@@ -380,7 +383,8 @@ app.get('/info', async (req, res) => {
         "ProcessID": { processid },
         "SistemaOperativo": { so },
         "NodeVersion": { nodev },
-        "MemoriaDisponible": { memoriatotalre }
+        "MemoriaDisponible": { memoriatotalre },
+        "CPUS": { procesadores }
 
     }
 
@@ -586,16 +590,21 @@ if (modo == 'CLUSTER') {
             console.log(`worker ${worker.process.pid} died`)
         })
     } else {
-        http.createServer((req, res) => {
-            res.writeHead(200)
-            res.end('hola mundo')
-        }).listen(8000)
+        const server = httpServer.listen(puerto, () => {
+            console.log(`Ya me conecte al puerto ${server.address().port}`)
+        })
+
+        server.on('error', (error) => {
+            console.log('Hubo un error');
+            console.log(error);
+        })
+
         console.log(`worker ${process.pid} started`)
     }
 
 
 } else {
-    const httpServer = new HTTPServer()
+
     const server = httpServer.listen(puerto, () => {
         console.log(`Ya me conecte al puerto ${server.address().port}`)
     })
