@@ -1,5 +1,7 @@
 const express = require('express')
+const http = require('http')
 const { Server: HTTPServer } = require('http')
+
 const { Server: SocketServer } = require('socket.io');
 const admin = require('firebase-admin');
 const fs = require('fs');
@@ -59,6 +61,12 @@ dotenv.config({
             : path.resolve(__dirname, 'colores.env')
 })
 
+
+//CLUSTER
+const cluster = require('cluster')
+const numCPUs = require('os').cpus().length;
+
+
 //MINIMIST
 
 const parseArgs = require('minimist')
@@ -67,10 +75,11 @@ const options = {
     alias: {
         m: 'modo',
         p: 'puerto',
-        d: 'debug'
+        d: 'debug',
+
     },
     default: {
-        modo: 'prod',
+        modo: 'FORK',
         puerto: 8080,
         debug: false
     }
@@ -142,8 +151,7 @@ function auth(req, res, next) {
 //const fire = new moduloFirebase.Contenedor();
 
 const app = express();
-const httpServer = new HTTPServer(app)
-const io = new SocketServer(httpServer)
+
 
 //-----FIREBASE
 //daofire.getAll() // -> trae todos los productos
@@ -197,72 +205,6 @@ conectarmongo()
 //cartsdaomon.getById('insertar id')
 
 //-------MONGOOSE
-
-
-io.on('connection', async socket => {
-    console.log('Nuevo cliente conectado')
-
-    const productos = await arc.getAll()
-    socket.emit('messages', productos)
-
-    const mensajes = await msg.getAll()
-
-
-    let mensajesNuevo = await mensajes.map(mj => {
-
-        let a = normalize(mj, mensajeSchema)
-        return a
-
-    })
-    await console.log(mensajesNuevo)
-
-    socket.emit('mensajes', mensajesNuevo)
-
-
-
-
-    socket.on('new-product', producto => {
-        arc.save(producto).then(results => console.log(`${results}`));
-        productos.push(producto)
-        io.sockets.emit('messages', productos)
-    }
-    )
-
-    socket.on('new-mensaje', async mensaje => {
-        console.log(mensaje)
-
-        const Mjnew = {
-            author: {
-                id: mensaje.id,
-                name: mensaje.name,
-                apellido: mensaje.apellido,
-                edad: mensaje.edad,
-                alias: mensaje.alias,
-                avatar: mensaje.alias,
-            },
-            text: "nn"
-        }
-
-
-        await msg.saveNew(Mjnew).then(results => console.log(`${results}`));
-        await mensajes.push(Mjnew)
-
-        let mensajesNuevo = await mensajes.map(mj => {
-
-            let a = normalize(mj, mensajeSchema)
-            return a
-
-        })
-        await console.log(mensajesNuevo)
-
-
-        await io.sockets.emit('mensajes', mensajesNuevo)
-
-    }
-    )
-
-
-})
 
 
 
@@ -632,14 +574,38 @@ app.post(
 )
 
 
+if (modo == 'CLUSTER') {
+    if (cluster.isPrimary) {
+        console.log(`PID MASTER ${process.pid}`)
+
+        for (let i = 0; i < numCPUs; i++) {
+            cluster.fork()
+        }
+
+        cluster.on('exit', (worker, code, signal) => {
+            console.log(`worker ${worker.process.pid} died`)
+        })
+    } else {
+        http.createServer((req, res) => {
+            res.writeHead(200)
+            res.end('hola mundo')
+        }).listen(8000)
+        console.log(`worker ${process.pid} started`)
+    }
+
+
+} else {
+    const httpServer = new HTTPServer()
+    const server = httpServer.listen(puerto, () => {
+        console.log(`Ya me conecte al puerto ${server.address().port}`)
+    })
+
+    server.on('error', (error) => {
+        console.log('Hubo un error');
+        console.log(error);
+    })
+    console.log('MODO FORK')
+}
 
 
 
-const server = httpServer.listen(puerto, () => {
-    console.log(`Ya me conecte al puerto ${server.address().port}`)
-})
-
-server.on('error', (error) => {
-    console.log('Hubo un error');
-    console.log(error);
-})
