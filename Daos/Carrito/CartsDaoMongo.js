@@ -6,7 +6,12 @@ class CartsDaoMongo extends moduloMon.Contenedor {
 
     constructor() {
         const s = new mongoose.Schema({
-            productos: { type: String, required: true }
+            email: { type: String, required: true },
+            productos: { type: String, required: false },
+            direccion: { type: String, required: false },
+            fecha: { type: Date, required: false },
+            idcliente: { type: String, required: true }
+
 
         });
         super('carts', s, mongoose.model('carts', s))

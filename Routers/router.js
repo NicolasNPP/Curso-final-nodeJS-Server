@@ -3,9 +3,13 @@ const { Socket } = require('socket.io');
 const modulo = require('../Entregas/Entrega2.js')
 const arc = new modulo.Contenedor('productos');
 const moduloCart = require('../Entregas/Cart.js')
-const cart = new moduloCart.ContenedorCart('carrito');
 const { fork } = require('child_process')
+const CartsDaoMon = require('../Daos/Carrito/CartsDaoMongo')
+const cartsdaomon = new CartsDaoMon.CartsDaoMongo();
 
+const OrdenesDaoMon = require('../Daos/Ordenes/OrdenesDaoMongo')
+const ordenesdaomon = new OrdenesDaoMon.OrdenesDaoMongo();
+const email = require('../Config/Emails')
 
 
 
@@ -20,6 +24,75 @@ function getAleatorio() {
 routerM.get('/', (req, res) => {
     res.send('Hola desde express')
 });
+
+routerM.get('/ordenes', (req, res) => {
+
+    ordenesdaomon.getAll().then(results => res.json(`${JSON.stringify(results)}`));
+    //enviar = new email.CrearEmail('ramon.hahn61@ethereal.email', 'nicolasnahuel94@gmail.com', 'Orden completada').envio()
+
+});
+
+
+routerM.delete('/ordenes/:id', (req, res) => {
+    //En String
+
+
+    ordenesdaomon.deleteById(req.params.id).then(results => res.json(`${results}`))
+
+
+
+
+
+});
+
+routerM.post('/ordenes/:idcart', (req, res) => {
+    const orden = {
+        "idcliente": undefined
+    }
+
+
+    cartsdaomon.getById(req.params.idcart).then(results => {
+
+
+
+
+        orden.idcliente = `${results[0].idcliente}`;
+        orden.productos = `${results[0].productos}`;
+
+
+
+
+        if (orden.idcliente === undefined) {
+            res.json({ "Respuesta": "No encontrado" })
+        } else {
+
+
+
+            ordenesdaomon.save(orden)
+
+            cartsdaomon.deleteById(req.params.idcart)
+
+            const enviar = new email.CrearEmail('ramon.hahn61@ethereal.email', `${results[0].email}`, `Su orden fue exitosa. Productos: ${results[0].productos}`).envio()
+
+            res.json(`${JSON.stringify(orden)}`)
+        }
+
+
+
+
+    });
+
+
+
+
+
+    //ordenesdaomon.save(req.body).then(results => res.send(`${results}`));
+
+
+});
+
+
+
 
 routerM.get('/productos', (req, res) => {
     arc.getAll().then(results => res.json(`${JSON.stringify(results)}`));
@@ -40,7 +113,14 @@ routerM.post('/productos', (req, res) => {
 })
 
 routerM.get('/carrito/:id/productos', (req, res) => {
-    cart.getAll(parseInt(req.params.id)).then(results => res.json(`${JSON.stringify(results)}`));
+    cartsdaomon.getById(req.params.id).then(results => res.json(`${JSON.stringify(results)}`));
+});
+
+routerM.get('/carritos/', (req, res) => {
+
+
+    cartsdaomon.getAll().then(results => res.json(`${JSON.stringify(results)}`));
+
 });
 
 
@@ -72,7 +152,7 @@ routerM.get('/randoms', async (req, res) => {
 routerM.post('/carrito', async (req, res) => {
 
 
-    await cart.save(req.body).then(results => res.send(`${results}`));
+    await cartsdaomon.save(req.body).then(results => res.json(`${results}`));
 
 })
 
@@ -82,7 +162,7 @@ routerM.delete('/carrito/:id', (req, res) => {
     //En String
 
 
-    cart.deleteById(parseInt(req.params.id)).then(results => res.json(`${results}`))
+    cartsdaomon.deleteById(req.params.id).then(results => res.json(`${results}`))
 
 
 
@@ -94,7 +174,7 @@ routerM.put('/carrito/:id', (req, res) => {
     //En String
 
 
-    cart.putById(req.body, parseInt(req.params.id)).then(results => res.json(results));
+    cartsdaomon.putById(req.body, parseInt(req.params.id)).then(results => res.json(results));
 
 
 

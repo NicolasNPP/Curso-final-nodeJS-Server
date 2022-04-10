@@ -1,5 +1,4 @@
 
-
 class Contenedor {
     constructor(coleccion, schema, DAO) {
         this.coleccion = coleccion;
@@ -9,26 +8,28 @@ class Contenedor {
 
     save = async inser => {
         const dataAInsertar = inser;
-        this.DAO.insertMany(dataAInsertar)
+        const guardar = this.DAO.insertMany(dataAInsertar)
+        await guardar
+        return guardar
+
+
 
     }
 
     getAll = async inser => {
         const productos = this.DAO.find({})
+
+
+
         return productos
     }
 
 
     getById = async ID => {
-        this.DAO.find({ _id: ID }, function (error, productos) {
-            if (error) {
-                //console.log('Ha surgido un error.');
-            } else {
-                console.log({
-                    productos: productos
-                });
-            }
-        })
+        const buscar = this.DAO.find({ _id: ID })
+        return buscar
+
+
     }
 
     validateName = async name => {
@@ -39,13 +40,12 @@ class Contenedor {
     deleteById = async ID => {
         this.DAO.remove({ _id: ID }, function (error) {
             if (error) {
-                console.log('Error al intentar eliminar el personaje.');
+                console.log('Error al eliminar.');
             } else {
                 console.log('Registro borrado');
             }
         });
     }
-
 
 
 

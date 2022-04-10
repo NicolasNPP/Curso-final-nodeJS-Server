@@ -1,8 +1,5 @@
 const express = require('express')
-const http = require('http')
 const { Server: HTTPServer } = require('http')
-
-
 const admin = require('firebase-admin');
 const fs = require('fs');
 const serviceAccount = JSON.parse(fs.readFileSync('backend-coderhouse-efe86-firebase-adminsdk-nwjt9-3d483c1fd4.json', 'utf8'))
@@ -14,7 +11,7 @@ const routerM = require('./Routers/router.js')
 const modulo = require('./Entregas/Entrega2.js')
 const moduloCart = require('./Entregas/cart.js')
 const DaoMon = require('./Daos/Productos/productosDaoMongo')
-const CartsDaoMon = require('./Daos/Carrito/CartsDaoMongo')
+
 const UserDaoMon = require('./Daos/Usuarios/usuariosDaoMongo')
 const DaoFirebase = require('./Daos/Productos/productosDaoFirebase')
 const DaoCartsFirebase = require('./Daos/Carrito/cartsDaoFirebase')
@@ -26,7 +23,7 @@ const msg = new modulo.Contenedor('mensajes');
 
 //const mon = new moduloMon.Contenedor('productos', s, mongoose.model('productos', s));
 const daomon = new DaoMon.productosDaoMongo();
-const cartsdaomon = new CartsDaoMon.CartsDaoMongo();
+
 const userdaomon = new UserDaoMon.usuariosDaoMongo();
 const daofire = new DaoFirebase.productosDaoFirebase();
 const cartsdaofire = new DaoCartsFirebase.cartsDaoFirebase();
@@ -541,15 +538,6 @@ app.get('/pruebas', (req, res) => {
 })
 
 
-
-app.get('/carrito', async (req, res) => {
-
-    //arcCart.getAll(req.params.id).then(results => res.json(`${JSON.stringify(results)}`));
-
-    cartsdaomon.getAll().then(productos => res.json(productos))
-
-
-})
 
 app.post('/register', async (req, res) => {
 
