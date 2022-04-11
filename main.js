@@ -44,6 +44,12 @@ const passport = require('passport')
 const LocalStrategy = require('passport-local').Strategy
 const bCrypt = require('bcrypt');
 
+const jwt = require('jsonwebtoken')
+
+
+//EMAILS
+const email = require('./Config/Emails')
+
 //SESSION
 const session = require('express-session')
 
@@ -127,6 +133,34 @@ function auth(req, res, next) {
 
 
 
+
+
+
+}
+
+function authJWT(req, res, next) {
+
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader) {
+        return res.status(403).json({
+            error: 'No autorizado'
+        })
+    }
+
+    const token = authHeader.split(' ')[1];
+
+    jwt.verify(token, 'secretkey', (err, decoded) => {
+        if (err) {
+            return res.status(403).json({
+                error: 'No autorizado'
+            })
+        }
+        req.username = decoded.data;
+        next();
+
+
+    })
 
 
 
@@ -351,7 +385,7 @@ app.get('/productos', async (req, res) => {
     const contenido = await arc.getAll();
     res.render('datos.hbs', {
         a: contenido,
-        b: `Hola! ${req.session.user}`
+        b: `Holaa! ${req.session.username}`
 
 
 
@@ -391,6 +425,44 @@ app.get('/info', async (req, res) => {
 
 })
 
+
+
+
+app.post('/loginjwt', async (req, res) => {
+
+    const user = {
+        nombre: "nico",
+        apellido: "pe",
+        email: "dasasads@dasdas.com"
+    }
+
+
+    jwt.sign({ user }, 'secretkey', { expiresIn: '1h' }, (err, token) => {
+        res.json(
+            {
+                token
+            }
+        )
+    })
+
+
+
+})
+
+
+function verifyToken(req, res, next) {
+    const bearHeader = req.headers['authorization'];
+
+    if (typeof bearHeader !== 'undefined') {
+        const bearToken = bearHeader.split(" ")[1];
+        req.token = bearToken;
+        next()
+    } else {
+        res.sendStatus(403)
+    }
+}
+
+
 app.get('/failsignup', async (req, res) => {
 
     console.log('error al logear')
@@ -414,10 +486,10 @@ app.get('/datos', auth, async (req, res) => {
 
 })
 
-app.get('/nombre', async (req, res) => {
+app.get('/nombre', authJWT, async (req, res) => {
 
-    const nombre = req.session.user;
-    res.json(nombre)
+
+    res.json('hola')
 
 
 
@@ -503,6 +575,50 @@ app.get('/login', (req, res) => {
 
 })
 
+app.post('/loginjwtt', async (req, res) => {
+
+    const { username, password } = req.body;
+
+
+
+
+    const y = userdaomon.validateName(username);
+
+    y.then(a => {
+
+        let compare = bCrypt.compareSync(password, a[0].password);
+        if ((a.length == 0)) {
+            return res.send('Error al logear')
+        } else {
+
+            if ((a[0].username == username) && (compare == true)) {
+
+
+                const usuario = {
+                    username: a[0].username,
+                    password: a[0].password,
+                }
+
+                const accessToken = generarToken(usuario);
+
+
+
+                res.json(accessToken)
+            } else {
+                return res.send('Error al logear')
+            }
+
+        }
+
+
+
+
+    })
+
+
+
+})
+
 app.post(
     '/login',
     passport.authenticate('login', {
@@ -537,19 +653,39 @@ app.get('/pruebas', (req, res) => {
 
 })
 
+function generarToken(user) {
+    const token = jwt.sign({ data: user }, 'secretkey', { expiresIn: '1h' })
+    return token
+
+}
 
 
 app.post('/register', async (req, res) => {
 
-    const y = userdaomon.validateName(req.body.usuario);
+    const y = userdaomon.validateName(req.body.username);
+
+    spasswordHash = await bCrypt.hash(req.body.password, 8);
 
     y.then(a => {
         if ((a.length == 0)) {
             console.log('Registrando')
-            userdaomon.save(req.body)
-            res.redirect('/login.html')
+
+            new email.CrearEmail('ramon.hahn61@ethereal.email', `${req.body.username}`, `Su usuario fue registrado con exito`).envio()
+
+
+
+
+            const usuario = {
+                username: req.body.username,
+                password: spasswordHash,
+            }
+
+            const accessToken = generarToken(usuario);
+            console.log(usuario)
+            userdaomon.save(usuario)
+            res.json({ accessToken })
         } else {
-            console.log('El usuario ya existe')
+            res.json({ "Detalle": "El usuario ya existe" })
 
         }
     })
@@ -602,6 +738,7 @@ if (modo == 'CLUSTER') {
         console.log(error);
     })
     console.log('MODO FORK')
+
 }
 
 
