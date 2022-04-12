@@ -95,7 +95,7 @@ io.on('connection', async socket => {
 //----CONEXION A BD MONGO
 
 conectarmongo = async conectar => {
-    await mongoose.connect('mongodb://localhost/productos', {
+    await mongoose.connect('mongodb+srv://administrador:hwIZSSnDwIgQBAMS@cluster0.bktzb.mongodb.net/Cluster0?retryWrites=true&w=majority', {
         serverSelectionTimeoutMS: 5000,
     })
     console.log('Base de datos conectada')
