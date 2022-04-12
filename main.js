@@ -75,7 +75,7 @@ io.on('connection', async socket => {
     socket.on('new-mensaje', mensaje => {
         console.log(mensaje)
         //msg.save(mensaje).then(results => console.log(`${results}`));
-        dataBase.insertarMensaje(mensaje).then(results => console.log('Mensaje guardado en DB'))
+        //dataBase.insertarMensaje(mensaje).then(results => console.log('Mensaje guardado en DB'))
         mensajes.push(mensaje)
         io.sockets.emit('mensajes', mensajes)
 
