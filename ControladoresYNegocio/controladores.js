@@ -10,7 +10,7 @@ const CartsDaoMon = require('../Persistencia/Daos/Carrito/CartsDaoMongo')
 const cartsdaomon = new CartsDaoMon.CartsDaoMongo();
 
 //DAO PRODUCTOS
-const ProductosDaoMon = require('../Persistencia/Daos/Productos/ProductosDaoMongo')
+const ProductosDaoMon = require('../Persistencia/Daos/Productos/productosDaoMongo')
 const productosdaomon = new ProductosDaoMon.productosDaoMongo();
 
 
