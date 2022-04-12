@@ -1,6 +1,5 @@
 const { createTransport } = require('nodemailer')
 
-
 class CrearEmail {
     constructor(desde, hasta, elMensaje) {
         this.from = desde;
@@ -9,12 +8,6 @@ class CrearEmail {
 
 
     }
-
-
-
-
-
-
 
     envio = () => {
         try {
@@ -43,13 +36,6 @@ class CrearEmail {
 
     }
 
-
-
-
-
-
 }
-
-
 
 module.exports.CrearEmail = CrearEmail;

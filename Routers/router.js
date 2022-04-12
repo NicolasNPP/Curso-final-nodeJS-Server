@@ -1,211 +1,81 @@
-const { Router, application } = require('express');
-const { Socket } = require('socket.io');
-const modulo = require('../Entregas/Entrega2.js')
-const arc = new modulo.Contenedor('productos');
-const moduloCart = require('../Entregas/Cart.js')
-const { fork } = require('child_process')
-const CartsDaoMon = require('../Daos/Carrito/CartsDaoMongo')
-const cartsdaomon = new CartsDaoMon.CartsDaoMongo();
-
-const OrdenesDaoMon = require('../Daos/Ordenes/OrdenesDaoMongo')
-const ordenesdaomon = new OrdenesDaoMon.OrdenesDaoMongo();
-const email = require('../Config/Emails')
-
-
-
-
+const { Router } = require('express');
 const routerM = Router();
+const jwt = require('jsonwebtoken')
+
+/////CONTROLADORES
+const Controladores = require('../ControladoresYNegocio/controladores')
+const controladores = new Controladores.Controladores()
 
 
-function getAleatorio() {
-    return parseInt(Math.random() * 3 + 1);
-}
+/////RUTAS/////
 
-routerM.get('/', (req, res) => {
-    res.send('Hola desde express')
+////ORDENES
+routerM.get('/ordenes', controladores.getOrder);
+
+routerM.delete('/ordenes/:id', controladores.deleteOrder);
+
+routerM.post('/ordenes/:idcart', controladores.createOrder);
+
+////PRODUCTOS
+routerM.get('/productos', controladores.getProduct);
+
+routerM.post('/productos', authJWT, controladores.createProduct)
+
+routerM.get('/productos/:id', controladores.ViewProductId);
+
+routerM.put('/productos/:id', authJWT, (req, res) => {
+    productosdaomon.putById(req.params.id, req.body.nuevo).then(results => res.json("Producto actualizado"));
 });
 
-routerM.get('/ordenes', (req, res) => {
+routerM.delete('/productos/:id', authJWT, controladores.DeleteProductId);
 
-    ordenesdaomon.getAll().then(results => res.json(`${JSON.stringify(results)}`));
-    //enviar = new email.CrearEmail('ramon.hahn61@ethereal.email', 'nicolasnahuel94@gmail.com', 'Orden completada').envio()
+////CARRITO
+routerM.get('/carrito/:id', controladores.ViewCartId);
 
-});
+routerM.get('/carritos/', controladores.ViewAllCarts);
+
+routerM.post('/carrito', controladores.createCart)
+
+routerM.delete('/carrito/:id', controladores.deleteCart);
+
+routerM.put('/carrito/:id', controladores.putCart);
+
+//Agregar o quitar productos carrito
+routerM.put('/carrito/:idcart/:idprod/:cant', controladores.addToCart);
 
 
-routerM.delete('/ordenes/:id', (req, res) => {
-    //En String
 
+///MIDDELWARE DE AUTH + ADMIN
+function authJWT(req, res, next) {
 
-    ordenesdaomon.deleteById(req.params.id).then(results => res.json(`${results}`))
+    const authHeader = req.headers.authorization;
 
-
-
-
-
-});
-
-routerM.post('/ordenes/:idcart', (req, res) => {
-    const orden = {
-        "idcliente": undefined
+    if (!authHeader) {
+        return res.status(403).json({
+            error: 'No autorizado'
+        })
     }
 
+    const token = authHeader.split(' ')[1];
 
-    cartsdaomon.getById(req.params.idcart).then(results => {
-
-
-
-
-        orden.idcliente = `${results[0].idcliente}`;
-        orden.productos = `${results[0].productos}`;
-
-
-
-
-        if (orden.idcliente === undefined) {
-            res.json({ "Respuesta": "No encontrado" })
-        } else {
-
-
-
-            ordenesdaomon.save(orden)
-
-            cartsdaomon.deleteById(req.params.idcart)
-
-            const enviar = new email.CrearEmail('ramon.hahn61@ethereal.email', `${results[0].email}`, `Su orden fue exitosa. Productos: ${results[0].productos}`).envio()
-
-            res.json(`${JSON.stringify(orden)}`)
+    jwt.verify(token, 'secretkey', (err, decoded) => {
+        if (err) {
+            return res.status(403).json({
+                error: 'No autorizado'
+            })
         }
+        req.username = decoded.data;
+        console.log(decoded.data)
+
+        //VERIFICO SI ES EL USUARIO ADMIN (Harcodeado)
+        if (decoded.data.username == 'pruebajwt@a.com') {
+            next();
+        } else return res.status(403).json({
+            error: 'No autorizado'
+        })
 
 
-
-
-    });
-
-
-
-
-
-    //ordenesdaomon.save(req.body).then(results => res.send(`${results}`));
-
-
-});
-
-
-
-
-routerM.get('/productos', (req, res) => {
-    arc.getAll().then(results => res.json(`${JSON.stringify(results)}`));
-});
-
-routerM.get('/productos-test', (req, res) => {
-    arc.getProductFalse();
-});
-
-routerM.post('/productos', (req, res) => {
-
-
-
-    arc.save(req.body).then(results => res.send(`${results}`));
-
-
-    //arc.save(req.body).then(results => res.send(`${results}`));
-})
-
-routerM.get('/carrito/:id/productos', (req, res) => {
-    cartsdaomon.getById(req.params.id).then(results => res.json(`${JSON.stringify(results)}`));
-});
-
-routerM.get('/carritos/', (req, res) => {
-
-
-    cartsdaomon.getAll().then(results => res.json(`${JSON.stringify(results)}`));
-
-});
-
-
-
-
-routerM.get('/randoms', async (req, res) => {
-
-    const computo = fork('./computo.js')
-    computo.send('start')
-    computo.on('message', sum => {
-        res.send(`la suma es ${sum}`)
     })
-
-
-
-
-
-
-});
-
-
-
-
-
-
-
-
-
-routerM.post('/carrito', async (req, res) => {
-
-
-    await cartsdaomon.save(req.body).then(results => res.json(`${results}`));
-
-})
-
-
-
-routerM.delete('/carrito/:id', (req, res) => {
-    //En String
-
-
-    cartsdaomon.deleteById(req.params.id).then(results => res.json(`${results}`))
-
-
-
-
-
-});
-
-routerM.put('/carrito/:id', (req, res) => {
-    //En String
-
-
-    cartsdaomon.putById(req.body, parseInt(req.params.id)).then(results => res.json(results));
-
-
-
-
-
-});
-
-routerM.get('/productoRandom', (req, res) => {
-    arc.getById(parseInt(getAleatorio())).then(results => res.json(results));
-});
-
-routerM.get('/productos/:id', (req, res) => {
-    //En String
-    arc.getById(parseInt(req.params.id)).then(results => res.json(results));
-    //Por consola
-    arc.getById(parseInt(req.params.id)).then(results => console.log(results));
-});
-
-routerM.put('/productos/:id', (req, res) => {
-    arc.putById(req.body, req.params.id).then(results => res.json(results));;
-});
-
-routerM.delete('/productos/:id', (req, res) => {
-    //En String
-    arc.deleteById(parseInt(req.params.id)).then(results => res.json(`${results}`))
-});
-
-
-routerM.post('/', (req, res) => {
-    //x.push(req.body);
-    //res.json(req.body);
-})
+}
 
 module.exports = routerM;
