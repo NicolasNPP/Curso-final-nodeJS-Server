@@ -1,6 +1,7 @@
 //SERVIDOR
 const express = require('express')
 const { Server: HTTPServer } = require('http')
+const { Server: SocketServer } = require('socket.io');
 const exphbs = require('express-handlebars');
 //RUTEO
 const routerM = require('./Routers/router.js')
@@ -51,6 +52,43 @@ console.log({ modo, puerto, debug, otros: _ })
 
 const app = express();
 const httpServer = new HTTPServer(app)
+const io = new SocketServer(httpServer)
+
+////////
+io.on('connection', async socket => {
+    console.log('Nuevo cliente conectado')
+
+    const mensajes = [{ "email": "Barco", "mj": "29" }]
+    socket.emit('mensajes', mensajes)
+
+
+
+
+    socket.on('new-product', producto => {
+        //arc.save(producto).then(results => console.log(`${results}`));
+        dataBase.insertar(producto).then(result => console.log('producto insertado'))
+        productos.push(producto)
+        io.sockets.emit('messages', productos)
+    }
+    )
+
+    socket.on('new-mensaje', mensaje => {
+        console.log(mensaje)
+        //msg.save(mensaje).then(results => console.log(`${results}`));
+        dataBase.insertarMensaje(mensaje).then(results => console.log('Mensaje guardado en DB'))
+        mensajes.push(mensaje)
+        io.sockets.emit('mensajes', mensajes)
+
+    }
+    )
+
+
+})
+
+
+
+
+///////
 
 
 //-----MONGOOSE
@@ -83,7 +121,7 @@ app.set('views', './views')
 //Routers
 app.use('/api', routerM)
 
-//Info de servidor
+//Vista con plantilla de configuracion del servidor
 app.get('/info', async (req, res) => {
 
     let argumentos = process.argv;
@@ -97,17 +135,31 @@ app.get('/info', async (req, res) => {
     let carpetaproyecto = process.cwd;
 
     const respuesta = {
-        "Argumentos": { argumentos },
-        "path": { path },
-        "ProcessID": { processid },
-        "SistemaOperativo": { so },
-        "NodeVersion": { nodev },
-        "MemoriaDisponible": { memoriatotalre },
-        "CPUS": { procesadores }
+        Argumentos: { argumentos },
+        path: { path },
+        ProcessID: { processid },
+        SistemaOperativo: { so },
+        NodeVersion: { nodev },
+        MemoriaDisponible: { memoriatotalre },
+        CPUS: { procesadores }
 
     }
-    res.json(respuesta)
+
+    enString = JSON.stringify(respuesta)
+
+    res.render('datos.hbs', {
+        a: enString
+
+
+
+
+    }
+    );
 })
+
+
+
+
 
 /////////LOGIN CON JWT
 app.post('/login', async (req, res) => {
