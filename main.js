@@ -56,7 +56,7 @@ const io = new SocketServer(httpServer)
 
 ////////
 io.on('connection', async socket => {
-    console.log('Nuevo cliente conectado')
+    console.log('Nuevo cliente conectado.')
 
     const mensajes = [{ "email": "Barco", "mj": "29" }]
     socket.emit('mensajes', mensajes)
